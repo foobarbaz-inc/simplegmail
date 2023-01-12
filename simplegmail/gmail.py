@@ -615,7 +615,7 @@ class Gmail(object):
         message_lists = [None] * num_threads
 
         def thread_download_batch(thread_num):
-            gmail = Gmail(_creds=self.creds)
+            gmail = Gmail(self.creds)
 
             start = thread_num * batch_size
             end = min(len(message_refs), (thread_num + 1) * batch_size)
