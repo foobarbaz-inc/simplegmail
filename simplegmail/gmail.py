@@ -25,6 +25,7 @@ from bs4 import BeautifulSoup
 import dateutil.parser as parser
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from httplib2 import Http
 
@@ -62,12 +63,12 @@ class Gmail(object):
         self._service = build("gmail", "v1", credentials=creds)
 
     @property
-    def service(self) -> 'googleapiclient.discovery.Resource':
+    def service(self) -> "googleapiclient.discovery.Resource":
         # Since the token is only used through calls to the service object,
         # this ensure that the token is always refreshed before use.
-        if self.creds.access_token_expired:
-            self.creds.refresh(Http())
-
+        if self.creds.expired:
+            self.creds.refresh(Request())
+            self._service = build("gmail", "v1", credentials=self.creds)
         return self._service
 
     def send_message(
