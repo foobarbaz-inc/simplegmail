@@ -25,9 +25,8 @@ from bs4 import BeautifulSoup
 import dateutil.parser as parser
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from google.oauth2.credentials import Credentials
 from httplib2 import Http
-from oauth2client import client, file, tools
-from oauth2client.clientsecrets import InvalidClientSecretsError
 
 from simplegmail import label
 from simplegmail.attachment import Attachment
@@ -58,47 +57,9 @@ class Gmail(object):
     # https://developers.google.com/gmail/api/quickstart/python
     # Make sure the client secret file is in the root directory of your app.
 
-    def __init__(
-        self,
-        client_secret_file: str = 'client_secret.json',
-        creds_file: str = 'gmail_token.json',
-        _creds: Optional[client.OAuth2Credentials] = None
-    ) -> None:
-        self.client_secret_file = client_secret_file
-        self.creds_file = creds_file
-
-        try:
-            # The file gmail_token.json stores the user's access and refresh
-            # tokens, and is created automatically when the authorization flow
-            # completes for the first time.
-            if _creds:
-                self.creds = _creds
-            else:
-                store = file.Storage(self.creds_file)
-                self.creds = store.get()
-
-            if not self.creds or self.creds.invalid:
-
-                # Will ask you to authenticate an account in your browser.
-                flow = client.flow_from_clientsecrets(
-                    self.client_secret_file, self._SCOPES
-                )
-                flags = tools.argparser.parse_args([])
-                self.creds = tools.run_flow(flow, store, flags)
-
-            self._service = build(
-                'gmail', 'v1', http=self.creds.authorize(Http()),
-                cache_discovery=False
-            )
-
-        except InvalidClientSecretsError:
-            raise FileNotFoundError(
-                "Your 'client_secret.json' file is nonexistent. Make sure "
-                "the file is in the root directory of your application. If "
-                "you don't have a client secrets file, go to https://"
-                "developers.google.com/gmail/api/quickstart/python, and "
-                "follow the instructions listed there."
-            )
+    def __init__(self, creds: Credentials) -> None:
+        self.creds = creds
+        self._service = build("gmail", "v1", credentials=creds)
 
     @property
     def service(self) -> 'googleapiclient.discovery.Resource':
