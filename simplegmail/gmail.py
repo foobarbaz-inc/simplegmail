@@ -457,7 +457,7 @@ class Gmail(object):
                 .get(userId=user_id, id=message_id)
                 .execute()
             )
-            return self._get_messages_from_refs(user_id, [message_ref], attachments)[0]
+            return self._get_messages_from_refs(user_id, [message_ref], attachments, parallel=False)[0]
 
         except HttpError as error:
             # Pass along the error
