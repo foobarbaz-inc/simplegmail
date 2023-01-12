@@ -71,6 +71,93 @@ class Gmail(object):
             self._service = build("gmail", "v1", credentials=self.creds)
         return self._service
 
+    def create_draft(
+        self,
+        sender: str,
+        to: str,
+        subject: str = '',
+        msg_html: Optional[str] = None,
+        msg_plain: Optional[str] = None,
+        cc: Optional[List[str]] = None,
+        bcc: Optional[List[str]] = None,
+        attachments: Optional[List[str]] = None,
+        signature: bool = False,
+        user_id: str = 'me',
+        in_reply_to: Optional[str] = None,
+        thread_id: Optional[str] = None
+    ) -> Message:
+        """
+        Creates a draft message.
+        
+        Args:
+            sender: The email address the message is being sent from.
+            to: The email address the message is being sent to.
+            subject: The subject line of the email.
+            msg_html: The HTML message of the email.
+            msg_plain: The plain text alternate message of the email. This is
+                often displayed on slow or old browsers, or if the HTML message
+                is not provided.
+            cc: The list of email addresses to be cc'd.
+            bcc: The list of email addresses to be bcc'd.
+            attachments: The list of attachment file names.
+            signature: Whether the account signature should be added to the
+                message.
+            user_id: The address of the sending account. 'me' for the
+                default address associated with the account.
+            in_reply_to: The message ID this message is replying to.
+            thread_id: The thread ID this message is part of.
+
+        Returns:
+            The Message object representing the created draft.
+
+        Raises:
+            googleapiclient.errors.HttpError: There was an error executing the
+                HTTP request.
+        """
+            
+        msg = self._create_message(
+            sender, to, subject, msg_html, msg_plain, cc=cc, bcc=bcc,
+            attachments=attachments, signature=signature, user_id=user_id,
+            in_reply_to=in_reply_to
+        )
+
+        try:
+            req_body = {'message': msg}
+            if thread_id:
+                req_body["thread_id"] = thread_id
+            req = self.service.users().drafts().create(userId='me', body=req_body)
+            res = req.execute()
+            return self._build_message_from_ref(user_id, res, 'reference')
+        except HttpError as e:
+            raise e
+
+    def send_draft(
+        self,
+        draft_id: str,
+        user_id: str = 'me'
+    ) -> Message:
+        """
+        Sends a draft message.
+
+        Args:
+            draft_id: The ID of the draft message to send.
+            user_id: The address of the sending account. 'me' for the
+                default address associated with the account.
+
+        Returns:
+            The Message object representing the sent message.
+
+        Raises:
+            googleapiclient.errors.HttpError: There was an error executing the
+                HTTP request.
+        """
+        try:
+            req = self.service.users().drafts().send(userId='me', body={'id': draft_id})
+            res = req.execute()
+            return self._build_message_from_ref(user_id, res, 'reference')
+        except HttpError as e:
+            raise e
+
     def send_message(
         self,
         sender: str,
@@ -838,7 +925,8 @@ class Gmail(object):
         bcc: List[str] = None,
         attachments: List[str] = None,
         signature: bool = False,
-        user_id: str = 'me'
+        user_id: str = 'me',
+        in_reply_to: Optional[str] = None
     ) -> dict:
         """
         Creates the raw email message to be sent.
@@ -856,6 +944,8 @@ class Gmail(object):
             signature: Whether the account signature should be added to the
                 message. Will add the signature to your HTML message only, or a
                 create a HTML message if none exists.
+            user_id: The current account address (default 'me').
+            in_reply_to: The message id of the message being replied to.
 
         Returns:
             The message dict.
@@ -897,6 +987,10 @@ class Gmail(object):
             msg.attach(attach_plain)
 
             self._ready_message_with_attachments(msg, attachments)
+        
+        if in_reply_to:
+            msg["In-Reply-To"] = in_reply_to
+            msg["References"] = in_reply_to
 
         return {
             'raw': base64.urlsafe_b64encode(msg.as_string().encode()).decode()
