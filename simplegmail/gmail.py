@@ -71,6 +71,52 @@ class Gmail(object):
             self._service = build("gmail", "v1", credentials=self.creds)
         return self._service
 
+    def create_draft(
+        self,
+        sender: str,
+        to: str,
+        subject: str = '',
+        msg_html: Optional[str] = None,
+        msg_plain: Optional[str] = None,
+        cc: Optional[List[str]] = None,
+        bcc: Optional[List[str]] = None,
+        attachments: Optional[List[str]] = None,
+        signature: bool = False,
+        user_id: str = 'me',
+        in_reply_to: Optional[str] = None,
+        thread_id: Optional[str] = None
+    ) -> Message:
+        """
+        Creates a draft message.
+        
+        Args:
+            sender: The email address the message is being sent from.
+            to: The email address the message is being sent to.
+            subject: The subject line of the email.
+            msg_html: The HTML message of the email.
+            msg_plain: The plain text alternate message of the email. This is
+                often displayed on slow or old browsers, or if the HTML message
+                is not provided.
+            cc: The list of email addresses to be cc'd.
+            bcc: The list of email addresses to be bcc'd.
+            attachments: The list of attachment file names.
+            signature: Whether the account signature should be added to the
+                message.
+            user_id: The address of the sending account. 'me' for the
+                default address associated with the account.
+            in_reply_to: The message ID this message is replying to.
+            thread_id: The thread ID this message is part of.
+
+        Returns:
+            The Message object representing the created draft.
+
+        Raises:
+            googleapiclient.errors.HttpError: There was an error executing the
+                HTTP request.
+
+        """
+
+
     def send_message(
         self,
         sender: str,
