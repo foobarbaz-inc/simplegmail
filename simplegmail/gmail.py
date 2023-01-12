@@ -127,7 +127,8 @@ class Gmail(object):
                 req_body["thread_id"] = thread_id
             req = self.service.users().drafts().create(userId='me', body=req_body)
             res = req.execute()
-            return self._build_message_from_ref(user_id, res, 'reference')
+            message_ref = res['message']
+            return self._build_message_from_ref(user_id, message_ref, 'reference')
         except HttpError as e:
             raise e
 
