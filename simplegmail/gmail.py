@@ -517,6 +517,36 @@ class Gmail(object):
 
         labels.append(label.SPAM)
         return self.get_messages(user_id, labels, query, attachments, True)
+    
+    def get_draft(
+        self, draft_id: str, user_id: str = "me", attachments: str = "reference"
+    ) -> Message:
+        """Gets a draft from your account by ID.
+        Args:
+            draft_id: The ID of the draft.
+            user_id: the user's email address. Default 'me', the authenticated
+                user.
+            attachments: accepted values are 'ignore' which completely
+                ignores all attachments, 'reference' which includes attachment
+                information but does not download the data, and 'download' which
+                downloads the attachment data to store locally. Default
+                'reference'.
+        Returns:
+            A single Message object.
+        Raises:
+            googleapiclient.errors.HttpError: There was an error executing the
+                HTTP request.
+        """
+        try:
+            draft_ref = (
+                self.service.users()
+                .drafts()
+                .get(userId=user_id, id=draft_id)
+                .execute()
+            )
+            return self._get_messages_from_refs(user_id, [draft_ref], attachments, parallel=False)[0]
+        except HttpError as error:
+            raise error
 
     def get_message(
         self, message_id: str, user_id: str = "me", attachments: str = "reference"
