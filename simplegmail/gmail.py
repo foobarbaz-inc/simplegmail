@@ -590,7 +590,8 @@ class Gmail(object):
         labels: Optional[List[Label]] = None,
         query: str = '',
         attachments: str = 'reference',
-        include_spam_trash: bool = False
+        include_spam_trash: bool = False,
+        max_results: Optional[int] = None
     ) -> List[Message]:
         """
         Gets messages from your account.
@@ -606,6 +607,7 @@ class Gmail(object):
                 downloads the attachment data to store locally. Default
                 'reference'.
             include_spam_trash: whether to include messages from spam or trash.
+            max_results: the maximum number of messages to return.
 
         Returns:
             A list of message objects.
@@ -622,7 +624,9 @@ class Gmail(object):
         labels_ids = [
             lbl.id if isinstance(lbl, Label) else lbl for lbl in labels
         ]
-
+        max_results_per_page = 100
+        if max_results and max_results < max_results_per_page:
+            max_results_per_page = max_results
         try:
             response = self.service.users().messages().list(
                 userId=user_id,
@@ -634,7 +638,9 @@ class Gmail(object):
             message_refs = []
             if 'messages' in response:  # ensure request was successful
                 message_refs.extend(response['messages'])
-
+            if max_results and len(message_refs) >= max_results:
+                return self._get_messages_from_refs(user_id, message_refs,
+                                                    attachments)
             while 'nextPageToken' in response:
                 page_token = response['nextPageToken']
                 response = self.service.users().messages().list(
@@ -646,6 +652,8 @@ class Gmail(object):
                 ).execute()
 
                 message_refs.extend(response['messages'])
+                if max_results and len(message_refs) >= max_results:
+                    break
 
             return self._get_messages_from_refs(user_id, message_refs,
                                                 attachments)
