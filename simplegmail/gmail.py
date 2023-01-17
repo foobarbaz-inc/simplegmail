@@ -631,6 +631,7 @@ class Gmail(object):
             response = self.service.users().messages().list(
                 userId=user_id,
                 q=query,
+                maxResults=max_results_per_page,
                 labelIds=labels_ids,
                 includeSpamTrash=include_spam_trash
             ).execute()
