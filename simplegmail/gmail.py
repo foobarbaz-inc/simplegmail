@@ -256,7 +256,8 @@ class Gmail(object):
         labels: Optional[List[Label]] = None,
         query: str = '',
         attachments: str = 'reference',
-        include_spam_trash: bool = False
+        include_spam_trash: bool = False,
+        max_results: Optional[int] = None
     ) -> List[Message]:
         """
         Gets starred messages from your account.
@@ -272,6 +273,7 @@ class Gmail(object):
                 downloads the attachment data to store locally. Default
                 'reference'.
             include_spam_trash: Whether to include messages from spam or trash.
+            max_results: The maximum number of messages to return.
 
         Returns:
             A list of message objects.
@@ -287,7 +289,7 @@ class Gmail(object):
 
         labels.append(label.STARRED)
         return self.get_messages(user_id, labels, query, attachments,
-                                 include_spam_trash)
+                                 include_spam_trash, max_results=max_results)
 
     def get_important_messages(
         self,
@@ -295,7 +297,8 @@ class Gmail(object):
         labels: Optional[List[Label]] = None,
         query: str = '',
         attachments: str = 'reference',
-        include_spam_trash: bool = False
+        include_spam_trash: bool = False,
+        max_results: Optional[int] = None
     ) -> List[Message]:
         """
         Gets messages marked important from your account.
@@ -311,6 +314,7 @@ class Gmail(object):
                 downloads the attachment data to store locally. Default
                 'reference'.
             include_spam_trash: Whether to include messages from spam or trash.
+            max_results: The maximum number of messages to return.
 
         Returns:
             A list of message objects.
@@ -326,7 +330,7 @@ class Gmail(object):
 
         labels.append(label.IMPORTANT)
         return self.get_messages(user_id, labels, query, attachments,
-                                 include_spam_trash)
+                                 include_spam_trash, max_results=max_results)
 
     def get_unread_messages(
         self,
@@ -334,7 +338,8 @@ class Gmail(object):
         labels: Optional[List[Label]] = None,
         query: str = '',
         attachments: str = 'reference',
-        include_spam_trash: bool = False
+        include_spam_trash: bool = False,
+        max_results: Optional[int] = None
     ) -> List[Message]:
         """
         Gets unread messages from your account.
@@ -350,6 +355,7 @@ class Gmail(object):
                 downloads the attachment data to store locally. Default
                 'reference'.
             include_spam_trash: Whether to include messages from spam or trash.
+            max_results: The maximum number of messages to return.
 
         Returns:
             A list of message objects.
@@ -365,7 +371,7 @@ class Gmail(object):
 
         labels.append(label.UNREAD)
         return self.get_messages(user_id, labels, query, attachments,
-                                 include_spam_trash)
+                                 include_spam_trash, max_results=max_results)
 
     def get_drafts(
         self,
@@ -373,7 +379,8 @@ class Gmail(object):
         labels: Optional[List[Label]] = None,
         query: str = '',
         attachments: str = 'reference',
-        include_spam_trash: bool = False
+        include_spam_trash: bool = False,
+        max_results: Optional[int] = None
     ) -> List[Message]:
         """
         Gets drafts saved in your account.
@@ -389,6 +396,7 @@ class Gmail(object):
                 downloads the attachment data to store locally. Default
                 'reference'.
             include_spam_trash: Whether to include messages from spam or trash.
+            max_results: The maximum number of messages to return.
 
         Returns:
             A list of message objects.
@@ -404,7 +412,7 @@ class Gmail(object):
 
         labels.append(label.DRAFT)
         return self.get_messages(user_id, labels, query, attachments,
-                                 include_spam_trash)
+                                 include_spam_trash, max_results=max_results)
 
     def get_sent_messages(
         self,
@@ -412,7 +420,8 @@ class Gmail(object):
         labels: Optional[List[Label]] = None,
         query: str = '',
         attachments: str = 'reference',
-        include_spam_trash: bool = False
+        include_spam_trash: bool = False,
+        max_results: Optional[int] = None
     ) -> List[Message]:
         """
         Gets sent messages from your account.
@@ -428,6 +437,7 @@ class Gmail(object):
                 downloads the attachment data to store locally. Default
                 'reference'.
             include_spam_trash: Whether to include messages from spam or trash.
+            max_results: The maximum number of messages to return.
 
         Returns:
             A list of message objects.
@@ -443,14 +453,15 @@ class Gmail(object):
 
         labels.append(label.SENT)
         return self.get_messages(user_id, labels, query, attachments,
-                                 include_spam_trash)
+                                 include_spam_trash, max_results=max_results)
 
     def get_trash_messages(
         self,
         user_id: str = 'me',
         labels: Optional[List[Label]] = None,
         query: str = '',
-        attachments: str = 'reference'
+        attachments: str = 'reference',
+        max_results: Optional[int] = None
     ) -> List[Message]:
 
         """
@@ -466,6 +477,7 @@ class Gmail(object):
                 information but does not download the data, and 'download' which
                 downloads the attachment data to store locally. Default
                 'reference'.
+            max_results: The maximum number of messages to return.
 
         Returns:
             A list of message objects.
@@ -480,14 +492,15 @@ class Gmail(object):
             labels = []
 
         labels.append(label.TRASH)
-        return self.get_messages(user_id, labels, query, attachments, True)
+        return self.get_messages(user_id, labels, query, attachments, True, max_results=max_results)
 
     def get_spam_messages(
         self,
         user_id: str = 'me',
         labels: Optional[List[Label]] = None,
         query: str = '',
-        attachments: str = 'reference'
+        attachments: str = 'reference',
+        max_results: Optional[int] = None
     ) -> List[Message]:
         """
         Gets messages marked as spam from your account.
@@ -502,6 +515,7 @@ class Gmail(object):
                 information but does not download the data, and 'download' which
                 downloads the attachment data to store locally. Default
                 'reference'.
+            max_results: The maximum number of messages to return.
 
         Returns:
             A list of message objects.
@@ -517,7 +531,7 @@ class Gmail(object):
             labels = []
 
         labels.append(label.SPAM)
-        return self.get_messages(user_id, labels, query, attachments, True)
+        return self.get_messages(user_id, labels, query, attachments, True, max_results=max_results)
     
     def get_draft(
         self, draft_id: str, user_id: str = "me", attachments: str = "reference"
